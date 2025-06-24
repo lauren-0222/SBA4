@@ -1,0 +1,6 @@
+## Reflection
+While building the Task Management App, one of the biggest challenges I faced was figuring out how to work with localStorage and how to automatically update task statuses based on deadlines. Since these weren’t concepts I was completely familiar with, I had to do some research outside of class materials. I used online resources like MDN Web Docs and beginner-friendly tutorials to understand how to format dates properly and compare them in JavaScript.
+
+To solve the challenges, I broke down the app into smaller steps: first building the input form, then displaying tasks, and finally adding features like filtering and updating. I also simplified the code to make it more readable and beginner-friendly by avoiding advanced syntax like template literals.
+
+If I had more time, I would add features like deleting tasks, editing existing ones, and improving the overall design using Bootstrap. I would also like to validate user input more thoroughly and possibly separate the JavaScript logic into smaller functions for better organization.
