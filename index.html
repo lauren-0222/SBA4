@@ -9,6 +9,7 @@
 <body>
   <div class="container">
     <h1>Task Manager</h1>
+
     <div class="task-form">
       <input type="text" id="taskName" placeholder="Task Name" />
       <input type="text" id="taskCategory" placeholder="Category" />
@@ -17,7 +18,7 @@
         <option value="In Progress">In Progress</option>
         <option value="Completed">Completed</option>
       </select>
-      <button id="addTaskBtn">Add Task</button>
+      <button id="addTaskButton">Add Task</button>
     </div>
 
     <div class="filters">
@@ -43,10 +44,10 @@
           <th>Update</th>
         </tr>
       </thead>
-      <tbody id="taskList"></tbody>
+      <tbody id="taskList"></tbody> 
     </table>
   </div>
-  
+
   <script src="app.js"></script>
 </body>
 </html>

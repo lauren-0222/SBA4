@@ -1,74 +1,52 @@
-let taskData = JSON.parse(localStorage.getItem("taskData")) || [];
+let savedTaskArray = JSON.parse(localStorage.getItem("taskData")) || [];
 
-const listElement = document.getElementById("taskList");
-const createBtn = document.getElementById("addTaskBtn");
+const taskTableBodyElement = document.getElementById("taskList");
+const addTaskButtonElement = document.getElementById("addTaskButton");
 
-createBtn.onclick = function () {
-  const inputName = document.getElementById("taskName").value;
-  const inputType = document.getElementById("taskCategory").value;
-  const inputDue = document.getElementById("taskDeadline").value;
-  const inputState = document.getElementById("taskStatus").value;
+addTaskButtonElement.onclick = function () {
+  const title = document.getElementById("taskName").value;
+  const category = document.getElementById("taskCategory").value;
+  const deadline = document.getElementById("taskDeadline").value;
+  const status = document.getElementById("taskStatus").value;
 
-  if (!inputName || !inputType || !inputDue) return alert("Fill all fields");
+  if (!title || !category || !deadline) {
+    alert("Fill all fields");
+    return;
+  }
 
-  taskData.push({
-    title: inputName,
-    category: inputType,
-    deadline: inputDue,
-    status: inputState
-  });
-
-  persistTasks();
-  renderTasks();
+  savedTaskArray.push({ title, category, deadline, status });
+  saveTasksToLocalStorage();
+  updateTaskTable();
 };
 
-function renderTasks() {
-  listElement.innerHTML = "";
-  const selectedStatus = document.getElementById("filterStatus").value;
-  const selectedCategory = document.getElementById("filterCategory").value;
-  const uniqueCategories = new Set();
+function updateTaskTable () 
+  taskTableBodyElement.innerHTML = "";
+  const statusFilter = document.getElementById("filterStatus").value;
+  const categoryFilter = document.getElementById("filterCategory").value;
+  const categories = new Set();
 
-  for (let idx = 0; idx < taskData.length; idx++) {
-    let task = taskData[idx];
+  for (let i = 0; i < savedTaskArray.length; i++) {
+    let task = savedTaskArray[i];
 
     if (task.status !== "Completed" && task.deadline < new Date().toISOString().split("T")[0]) {
       task.status = "Overdue";
     }
 
-    uniqueCategories.add(task.category);
+    categories.add(task.category);
 
-    if (
-      (selectedStatus === "All" || task.status === selectedStatus) &&
-      (selectedCategory === "All" || task.category === selectedCategory)
-    ) {
-      let rowHTML = "<tr><td>" + task.title + "</td><td>" + task.category + "</td><td>" + task.deadline + "</td><td>" + task.status + "</td>";
-      rowHTML += `<td><select onchange="changeStatus(${idx}, this.value)">`;
-      rowHTML += `<option${task.status === "In Progress" ? " selected" : ""}>In Progress</option>`;
-      rowHTML += `<option${task.status === "Completed" ? " selected" : ""}>Completed</option>`;
-      rowHTML += "</select></td></tr>";
-      listElement.innerHTML += rowHTML;
+    if ((statusFilter === "All" || task.status === statusFilter) &&
+        (categoryFilter === "All" || task.category === categoryFilter)) {
+      let row = "<tr><td>" + task.title + "</td><td>" + task.category + "</td><td>" + task.deadline + "</td><td>" + task.status + "</td>";
+      row += "<td><select onchange='changeTaskStatus(" + i + ", this.value)'>";
+      row += "<option" + (task.status === "In Progress" ? " selected" : "") + ">In Progress</option>";
+      row += "<option" + (task.status === "Completed" ? " selected" : "") + ">Completed</option>";
+      row += "</select></td></tr>";
+      taskTableBodyElement.innerHTML += row;
     }
   }
 
-  const categoryFilter = document.getElementById("filterCategory");
-  categoryFilter.innerHTML = "<option>All</option>";
-  uniqueCategories.forEach(function (catOption) {
-    categoryFilter.innerHTML += `<option>${catOption}</option>`;
+  const categoryDropdown = document.getElementById("filterCategory");
+  categoryDropdown.innerHTML = "<option>All</option>";
+  categories.forEach(function (name) {
+    categoryDropdown.innerHTML += "<option>" + name + "</option>";
   });
-
-  persistTasks();
-}
-
-function changeStatus(index, newStatus) {
-  taskData[index].status = newStatus;
-  renderTasks();
-}
-
-function persistTasks() {
-  localStorage.setItem("taskData", JSON.stringify(taskData));
-}
-
-document.getElementById("filterStatus").onchange = renderTasks;
-document.getElementById("filterCategory").onchange = renderTasks;
-
-renderTasks();
