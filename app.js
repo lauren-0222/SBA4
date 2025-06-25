@@ -1,54 +1,74 @@
-let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+let taskData = JSON.parse(localStorage.getItem("taskData")) || [];
 
-const taskList = document.getElementById("taskList");
-const addBtn = document.getElementById("addTaskBtn");
+const listElement = document.getElementById("taskList");
+const createBtn = document.getElementById("addTaskBtn");
 
-addBtn.onclick = function () {
-  const name = document.getElementById("taskName").value;
-  const cat = document.getElementById("taskCategory").value;
-  const date = document.getElementById("taskDeadline").value;
-  const status = document.getElementById("taskStatus").value;
-  if (!name || !cat || !date) return alert("Fill all fields");
-  tasks.push({ name: name, cat: cat, date: date, status: status });
-  save();
-  show();
+createBtn.onclick = function () {
+  const inputName = document.getElementById("taskName").value;
+  const inputType = document.getElementById("taskCategory").value;
+  const inputDue = document.getElementById("taskDeadline").value;
+  const inputState = document.getElementById("taskStatus").value;
+
+  if (!inputName || !inputType || !inputDue) return alert("Fill all fields");
+
+  taskData.push({
+    title: inputName,
+    category: inputType,
+    deadline: inputDue,
+    status: inputState
+  });
+
+  persistTasks();
+  renderTasks();
 };
 
-function show() {
-  taskList.innerHTML = "";
-  let filterS = document.getElementById("filterStatus").value;
-  let filterC = document.getElementById("filterCategory").value;
-  let cats = new Set();
-  for (let i = 0; i < tasks.length; i++) {
-    let t = tasks[i];
-    if (t.status !== "Completed" && t.date < new Date().toISOString().split("T")[0]) t.status = "Overdue";
-    cats.add(t.cat);
-    if ((filterS === "All" || t.status === filterS) && (filterC === "All" || t.cat === filterC)) {
-      let row = "<tr><td>" + t.name + "</td><td>" + t.cat + "</td><td>" + t.date + "</td><td>" + t.status + "</td>";
-      row += "<td><select onchange=\"update(" + i + ", this.value)\">";
-      row += "<option" + (t.status === "In Progress" ? " selected" : "") + ">In Progress</option>";
-      row += "<option" + (t.status === "Completed" ? " selected" : "") + ">Completed</option>";
-      row += "</select></td></tr>";
-      taskList.innerHTML += row;
+function renderTasks() {
+  listElement.innerHTML = "";
+  const selectedStatus = document.getElementById("filterStatus").value;
+  const selectedCategory = document.getElementById("filterCategory").value;
+  const uniqueCategories = new Set();
+
+  for (let idx = 0; idx < taskData.length; idx++) {
+    let task = taskData[idx];
+
+    if (task.status !== "Completed" && task.deadline < new Date().toISOString().split("T")[0]) {
+      task.status = "Overdue";
+    }
+
+    uniqueCategories.add(task.category);
+
+    if (
+      (selectedStatus === "All" || task.status === selectedStatus) &&
+      (selectedCategory === "All" || task.category === selectedCategory)
+    ) {
+      let rowHTML = "<tr><td>" + task.title + "</td><td>" + task.category + "</td><td>" + task.deadline + "</td><td>" + task.status + "</td>";
+      rowHTML += `<td><select onchange="changeStatus(${idx}, this.value)">`;
+      rowHTML += `<option${task.status === "In Progress" ? " selected" : ""}>In Progress</option>`;
+      rowHTML += `<option${task.status === "Completed" ? " selected" : ""}>Completed</option>`;
+      rowHTML += "</select></td></tr>";
+      listElement.innerHTML += rowHTML;
     }
   }
-  let catSel = document.getElementById("filterCategory");
-  catSel.innerHTML = '<option>All</option>';
-  cats.forEach(function (c) {
-    catSel.innerHTML += '<option>' + c + '</option>';
+
+  const categoryFilter = document.getElementById("filterCategory");
+  categoryFilter.innerHTML = "<option>All</option>";
+  uniqueCategories.forEach(function (catOption) {
+    categoryFilter.innerHTML += `<option>${catOption}</option>`;
   });
-  save();
+
+  persistTasks();
 }
 
-function update(i, val) {
-  tasks[i].status = val;
-  show();
+function changeStatus(index, newStatus) {
+  taskData[index].status = newStatus;
+  renderTasks();
 }
 
-function save() {
-  localStorage.setItem("tasks", JSON.stringify(tasks));
+function persistTasks() {
+  localStorage.setItem("taskData", JSON.stringify(taskData));
 }
 
-document.getElementById("filterStatus").onchange = show;
-document.getElementById("filterCategory").onchange = show;
-show();
+document.getElementById("filterStatus").onchange = renderTasks;
+document.getElementById("filterCategory").onchange = renderTasks;
+
+renderTasks();
