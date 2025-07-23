@@ -17,9 +17,14 @@ addTaskButtonElement.onclick = function () {
   savedTaskArray.push({ title, category, deadline, status });
   saveTasksToLocalStorage();
   updateTaskTable();
+  clearForm();
 };
 
-function updateTaskTable () 
+function saveTasksToLocalStorage() {
+  localStorage.setItem("taskData", JSON.stringify(savedTaskArray));
+}
+
+function updateTaskTable() {
   taskTableBodyElement.innerHTML = "";
   const statusFilter = document.getElementById("filterStatus").value;
   const categoryFilter = document.getElementById("filterCategory").value;
@@ -34,19 +39,47 @@ function updateTaskTable ()
 
     categories.add(task.category);
 
-    if ((statusFilter === "All" || task.status === statusFilter) &&
-        (categoryFilter === "All" || task.category === categoryFilter)) {
-      let row = "<tr><td>" + task.title + "</td><td>" + task.category + "</td><td>" + task.deadline + "</td><td>" + task.status + "</td>";
-      row += "<td><select onchange='changeTaskStatus(" + i + ", this.value)'>";
-      row += "<option" + (task.status === "In Progress" ? " selected" : "") + ">In Progress</option>";
-      row += "<option" + (task.status === "Completed" ? " selected" : "") + ">Completed</option>";
-      row += "</select></td></tr>";
+    if (
+      (statusFilter === "All" || task.status === statusFilter) &&
+      (categoryFilter === "All" || task.category === categoryFilter)
+    ) {
+      let row = `
+        <tr>
+          <td>${task.title}</td>
+          <td>${task.category}</td>
+          <td>${task.deadline}</td>
+          <td>${task.status}</td>
+          <td>
+            <select onchange="changeTaskStatus(${i}, this.value)">
+              <option${task.status === "In Progress" ? " selected" : ""}>In Progress</option>
+              <option${task.status === "Completed" ? " selected" : ""}>Completed</option>
+            </select>
+          </td>
+        </tr>
+      `;
       taskTableBodyElement.innerHTML += row;
     }
   }
 
   const categoryDropdown = document.getElementById("filterCategory");
-  categoryDropdown.innerHTML = "<option>All</option>";
+  categoryDropdown.innerHTML = "<option value='All'>All</option>";
   categories.forEach(function (name) {
-    categoryDropdown.innerHTML += "<option>" + name + "</option>";
+    categoryDropdown.innerHTML += `<option value="${name}">${name}</option>`;
   });
+}
+
+function changeTaskStatus(index, newStatus) {
+  savedTaskArray[index].status = newStatus;
+  saveTasksToLocalStorage();
+  updateTaskTable();
+}
+
+function clearForm() {
+  document.getElementById("taskName").value = "";
+  document.getElementById("taskCategory").value = "";
+  document.getElementById("taskDeadline").value = "";
+  document.getElementById("taskStatus").value = "In Progress";
+}
+
+// Initialize table on load
+window.onload = updateTaskTable;
